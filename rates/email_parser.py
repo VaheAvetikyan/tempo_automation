@@ -1,22 +1,12 @@
-import imaplib
 import email
-import os
 from email.header import decode_header
 
-# account credentials
-username = os.environ.get('EMAIL')
-password = os.environ.get('EMAIL_PASS')
-NUMBER_OF_MESSAGES = 5
+from email_service.email import Email
 
 
 def get_text_from_email(target_mailbox, target_subject):
-    imap = imaplib.IMAP4_SSL("imap.gmail.com")
-    imap.login(username, password)
-
-    status, messages = imap.select(mailbox=target_mailbox)
-    messages = int(messages[0])
-
-    message_list = get_messages(imap, messages)
+    mail = Email()
+    message_list = mail.get_message_list(target_mailbox)
     for msg in message_list:
         if isinstance(msg[0], tuple):
             msg = email.message_from_bytes(msg[0][1])
@@ -41,14 +31,4 @@ def get_text_from_email(target_mailbox, target_subject):
                     body = msg.get_payload(decode=True).decode()
                     if content_type == "text/plain":
                         return body
-    imap.close()
-    imap.logout()
-
-
-def get_messages(imap, messages):
-    message_list = []
-    for i in range(messages, messages - NUMBER_OF_MESSAGES, -1):
-        res, msg = imap.fetch(str(i), "(RFC822)")
-        message_list.append(msg)
-
-    return message_list
+    mail.logout()

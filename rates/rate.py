@@ -1,7 +1,7 @@
 import re
 from datetime import date
 
-from rates.email_service import get_text_from_email
+from rates.email_parser import get_text_from_email
 from rates.xlsx_service import write_to_xlsx
 
 RATE_CONVENTION = {
