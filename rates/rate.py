@@ -1,7 +1,7 @@
 import re
 from datetime import date
 
-from rates.email_parser import get_text_from_email
+from email_service import text_parser
 from rates.xlsx_service import write_to_xlsx
 
 RATE_CONVENTION = {
@@ -20,7 +20,7 @@ def get_rates(xe_rate):
     today = date.today()
     mailbox = '"Correspondants/Rates reports"'
     subject = "MORE MONEY TRANSFERS - COMUNICADO TASAS FECHA"  # {today.strftime('%d/%m/%Y')}"
-    input_data = get_text_from_email(mailbox, subject)
+    input_data = text_parser(mailbox, subject, 5)
     input_dict = rates_to_dict(input_data)
 
     today = today.strftime("%Y-%m-%d")
