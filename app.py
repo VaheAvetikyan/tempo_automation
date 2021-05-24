@@ -24,10 +24,7 @@ def calculate_rates():
     rate = float(rate)
     get_rates(rate)
     filename = 'rates/output.xlsx'
-    end_time = datetime.now()
-    time_diff = (end_time - start_time)
-    execution_time = time_diff.total_seconds() * 1000
-    print("Execution took", execution_time, " ms")
+    app.logger.info("Execution took", (datetime.now() - start_time).total_seconds() * 1000, " ms")
     return send_file(filename, mimetype='application/vnd.ms-excel')
 
 
