@@ -1,16 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Rates</title>
-</head>
-<body>
-<div>
-    <form action="/rates/calculate" method="post">
-        <label for="rate">Input current EUR - USD rate: </label>
-        <input type="text" id="rate" name="rate"><br><br>
-        <input type="submit" value="Download Excel File">
+{% extends 'base.html' %}
+{% block title %}Rates{% endblock %}
+{% block header %}
+    <h1>Rates</h1>
+    <p>Rates will be calculated and returned in excel format.</p>
+{% endblock %}
+{% block body %}
+    <img width="140" height="140"
+         src="{{ url_for('static', filename='hologram.svg') }}" alt="File downloads">
+{% endblock %}
+{% block content %}
+    <form action="{{ url_for('calculate_rates') }}" method="post">
+        <div class="form-check">
+            <h4>Mailbox</h4>
+            <input class="form-check-input" type="radio" id="mailbox" name="mailbox"
+                   value='"Correspondants/Rates reports"'
+                   checked="checked">
+            <label class="form-check-label" for="mailbox">Rates reports</label>
+            <hr>
+            <h4>Subject</h4>
+            <input class="form-check-input" type="radio" id="subject" name="subject"
+                   value="MORE MONEY TRANSFERS - COMUNICADO TASAS FECHA"
+                   checked="checked">
+            <label class="form-check-label" for="rate">MORE MONEY TRANSFERS</label>
+            <hr>
+            <h4>Input current EUR - USD rate</h4>
+            <input type="text" id="rate" name="rate" placeholder="EUR - USD">
+            <hr>
+            <button type="submit" class="btn btn-primary">Download Excel File</button>
+        </div>
     </form>
-</div>
-</body>
-</html>
+{% endblock %}

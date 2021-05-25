@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary rounded">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{{ url_for('index') }}">Tempo Automation</a>
+                <div class="collapse navbar-collapse">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link active" href="{{ url_for('index') }}">Home</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="{{ url_for('rates') }}">Rates</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="{{ url_for('files') }}">File downloads</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    {% for message in get_flashed_messages() %}
+        <div class="alert alert-secondary">{{ message }}</div>
+    {% endfor %}
+    <div class="bg-info p-3 rounded">
+        <div class="row">
+            <div class="col-sm-6">
+                {% block header %}{% endblock %}
+            </div>
+            <div class="col-sm-6">
+                {% block body %}{% endblock %}
+            </div>
+        </div>
+    </div>
+    <div class="mb-4 text-white bg-dark p-5 rounded-3">
+        <div class="container-fluid py-5">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    <footer>
+        <nav class="navbar fixed-bottom navbar-expand-sm navbar-light bg-light rounded">
+            <div class="container-md">
+                <a class="navbar-brand" href="{{ url_for('index') }}">Tempo Automation</a>
+                <div class="collapse navbar-collapse" id="navbarCollapse">
+                    <ul class="navbar-nav">
+                        <li class="nav-item"><a class="nav-link active" href="{{ url_for('index') }}">Home</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="{{ url_for('rates') }}">Rates</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="{{ url_for('files') }}">File downloads</a>
+                        </li>
+                    </ul>
+                    <div class="ms-auto">
+                        <p>© 2021 OTOA - Tempo Recon · </p>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </footer>
+</div>
+</body>
+</html>

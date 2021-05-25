@@ -5,6 +5,7 @@ from email.header import decode_header
 
 
 class Email:
+    _instance = None
     # account credentials
     _username = os.environ.get('EMAIL')
     _password = os.environ.get('EMAIL_PASS')
@@ -12,7 +13,14 @@ class Email:
     imap = imaplib.IMAP4_SSL("imap.gmail.com")
 
     def __init__(self):
-        self.login()
+        raise RuntimeError('Call instance() instead')
+
+    @classmethod
+    def instance(cls):
+        if cls._instance is None:
+            cls._instance = cls.__new__(cls)
+            cls._instance.login()
+        return cls._instance
 
     def login(self):
         self.imap.login(self._username, self._password)
@@ -20,6 +28,12 @@ class Email:
     def logout(self):
         self.imap.close()
         self.imap.logout()
+
+    def folders_bytes(self):
+        lst = self.imap.list()
+        if lst[0] == 'OK':
+            lst = lst[1]
+        return lst
 
     def get_msg_list(self, target_mailbox, number):
         msg_list = []
@@ -107,10 +121,21 @@ def text_parser(mailbox, target_subject, number):
 
 
 def mail_messages(mailbox, number):
-    mail = Email()
+    mail = Email.instance()
     messages = mail.get_msg_list(mailbox, number)
-    mail.logout()
     return messages
+
+
+def mail_folders():
+    mail = Email.instance()
+    byte_list = mail.folders_bytes()
+    folders = []
+    encoding = 'utf-8'
+    for item in byte_list:
+        name = item.decode(encoding)
+        name = name.split('"/"')
+        folders.append(name[1])
+    return folders
 
 
 def make_filepath(folder_name, filename):

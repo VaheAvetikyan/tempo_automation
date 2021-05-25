@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}File downloads{% endblock %}
+{% block header %}
+    <h1>File downloads</h1>
+    <p>Download multiple files from email attachments.</p>
+{% endblock %}
+{% block body %}
+    <img width="140" height="140"
+         src="{{ url_for('static', filename='files.svg') }}" alt="Rates">
+{% endblock %}
+{% block content %}
+    <div>
+        <select class="form-select">
+            {% for folder in folders %}
+                <option value="{{ folder }}">{{ folder }}</option>
+            {% endfor %}
+        </select>
+    </div>
+{% endblock %}

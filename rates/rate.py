@@ -16,10 +16,8 @@ RATE_CONVENTION = {
 }
 
 
-def get_rates(xe_rate):
+def get_rates(xe_rate, mailbox, subject):
     today = date.today()
-    mailbox = '"Correspondants/Rates reports"'
-    subject = "MORE MONEY TRANSFERS - COMUNICADO TASAS FECHA"  # {today.strftime('%d/%m/%Y')}"
     input_data = text_parser(mailbox, subject, 5)
     input_dict = rates_to_dict(input_data)
 

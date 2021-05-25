@@ -1,20 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Home Page</title>
-</head>
-<body>
-<table>
-    <thead>
-    <th><h1>Rates</h1></th>
-    <th><h1>E-mail</h1></th>
-    </thead>
-    <tbody>
-    <td><a href="/rates">Rates</a></td>
-    <td><a href="/rates">Email</a></td>
-    </tbody>
-</table>
-
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Home Page{% endblock %}
+{% block header %}
+    <h1>Home</h1>
+{% endblock %}
+{% block body %}
+    <img width="140" height="140"
+         src="{{ url_for('static', filename='statistic.svg') }}" alt="Rates">
+{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-lg-4">
+            <img class="rounded-circle" width="140" height="140"
+                 src="{{ url_for('static', filename='rates.png') }}" alt="Rates">
+            <h2>Rates</h2>
+            <p>Rates from More Money for Latin America countries converted from local currency - US dollar to local
+                currency - Euro.</p>
+            <p><a class="btn btn-secondary" href="{{ url_for('rates') }}">View details »</a></p>
+        </div>
+        <div class="col-lg-4">
+            <img class="rounded-circle" width="140" height="140"
+                 src="{{ url_for('static', filename='files.png') }}" alt="File downloads">
+            <h2>File downloads</h2>
+            <p>Download multiple files from email attachments. This part is currently under development.</p>
+            <p><a class="btn btn-secondary" href="{{ url_for('files') }}">View details »</a></p>
+        </div>
+        <div class="col-lg-4">
+            <img class="rounded-circle" width="140" height="140"
+                 src="{{ url_for('static', filename='analyse.jpg') }}" alt="File downloads">
+            <h2>Analyse</h2>
+            <p>This part is currently under development.</p>
+            <p><a class="btn btn-secondary" href="#">View details »</a></p>
+        </div>
+    </div>
+{% endblock %}
