@@ -1,8 +1,11 @@
 from flask import Flask, render_template, request, Response, send_file, redirect, url_for
+import logging
 from datetime import datetime
 from rates.rate import get_rates
 
 app = Flask(__name__)
+
+app.logger.setLevel(logging.INFO)
 
 
 @app.route('/')
@@ -24,7 +27,7 @@ def calculate_rates():
     rate = float(rate)
     get_rates(rate)
     filename = 'rates/output.xlsx'
-    app.logger.info("Execution took", (datetime.now() - start_time).total_seconds() * 1000, " ms")
+    app.logger.info("Execution took %s s", (datetime.now() - start_time).total_seconds())
     return send_file(filename, mimetype='application/vnd.ms-excel')
 
 
