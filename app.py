@@ -1,10 +1,11 @@
 import os
+import zipfile
 
 from flask import Flask, render_template, request, Response, send_file, redirect, url_for, flash
 import logging
 from datetime import datetime
 
-from files.file import get_mail_folders
+from files.file import get_mail_folders, download_file
 from rates.rate import get_rates
 
 app = Flask(__name__)
@@ -41,7 +42,28 @@ def calculate_rates():
 @app.route('/files')
 def files():
     folders = get_mail_folders()
-    return render_template('files.html', folders=folders)
+    file_formats = [".csv", ".xml", ".pdf"]
+    return render_template('files.html', folders=folders, file_formats=file_formats)
+
+
+@app.route('/files/download', methods=['POST'])
+def download():
+    mailbox = request.form.get('mailbox')
+    file_format = request.form.get('format')
+    one_file = request.form.get('one') == "yes"
+    quantity = int(request.form.get('quantity'))
+    filenames = download_file(mailbox, file_format, one_file, quantity)
+    if len(filenames) > 1:
+        zipf = zipfile.ZipFile('tempo/out.zip', 'w', zipfile.ZIP_DEFLATED)
+        for file in filenames:
+            zipf.write(file)
+        zipf.close()
+        return send_file('out.zip',
+                         mimetype='zip',
+                         attachment_filename='out.zip',
+                         as_attachment=True)
+    else:
+        return send_file(filenames[0], mimetype='application/file_format')
 
 
 if __name__ == '__main__':

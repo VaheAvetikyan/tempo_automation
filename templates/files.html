@@ -1,5 +1,12 @@
 {% extends 'base.html' %}
 {% block title %}File downloads{% endblock %}
+<script>
+    $(document).ready(function () {
+        $("p").click(function (event) {
+            $(this).hide();
+        });
+    });
+</script>
 {% block header %}
     <h1>File downloads</h1>
     <p>Download multiple files from email attachments.</p>
@@ -9,11 +16,46 @@
          src="{{ url_for('static', filename='files.svg') }}" alt="Rates">
 {% endblock %}
 {% block content %}
-    <div>
-        <select class="form-select">
-            {% for folder in folders %}
-                <option value="{{ folder }}">{{ folder }}</option>
-            {% endfor %}
-        </select>
+    <div class="container">
+        <form class="form-floating" action="{{ url_for('download') }}" method="post">
+            <div class="mb-3 row">
+                <label for="mailbox" class="col-3 col-form-label"><h3>Target Mailbox</h3></label>
+                <div class="col-6">
+                    <select class="form-select" name="mailbox" id="mailbox" required>
+                        <option value="" disabled selected>Select mailbox...</option>
+                        {% for folder in folders %}
+                            <option value="{{ folder }}">{{ folder }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3 row">
+                <label for="file-formats" class="col-3 col-form-label"><h3>File Format</h3></label>
+                <div class="col-3">
+                    <select class="form-select" name="format" id="file-formats" required>
+                        <option value="" disabled selected>Select file format...</option>
+                        {% for format in file_formats %}
+                            <option value="{{ format }}">{{ format }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3 row">
+                <label for="one-file" class="col-3 col-form-label"><h3>In One File</h3></label>
+                <div class="col-1">
+                    <select class="form-select" name="one" id="one-file">
+                        <option value="no">No</option>
+                        <option value="yes">Yes</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3 row">
+                <label for="quantity" class="col-3 col-form-label"><h3>Number of Emails to Parse</h3></label>
+                <div class="col-1">
+                    <input type="number" name="quantity" class="form-control" id="quantity" min="0" value="1">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success">Download</button>
+        </form>
     </div>
 {% endblock %}

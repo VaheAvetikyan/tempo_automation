@@ -35,10 +35,10 @@ class Email:
             lst = lst[1]
         return lst
 
-    def get_msg_list(self, target_mailbox, number):
+    def get_msg_list(self, target_mailbox, quantity):
         msg_list = []
         messages = self._get_messages(target_mailbox)
-        for i in range(messages, messages - number, -1):
+        for i in range(messages, messages - quantity, -1):
             res, msg = self.imap.fetch(str(i), "(RFC822)")
             if isinstance(msg[0], tuple):
                 msg_list.append(msg)
@@ -57,6 +57,7 @@ class Message:
     body = None
     content_type = None
     content_disposition = None
+    attachment_name = None
     attachment = None
 
     def __init__(self, msg):
@@ -88,7 +89,8 @@ class Message:
         for part in self.msg.walk():
             self.content_disposition = str(part.get("Content-Disposition"))
             if "attachment" in self.content_disposition:
-                self.attachment = part.get_filename()
+                self.attachment_name = part.get_filename()
+                self.attachment = part.get_payload(decode=True)
             if part.get_content_type() == "text/plain":
                 self.content_type = part.get_content_type()
                 try:
@@ -102,27 +104,56 @@ class Message:
         self.body = self.msg.get_payload(decode=True).decode()
 
 
-def attachment_parser(mailbox, file_format, number):
-    folder_name = "tempo_sepa"
-    messages = mail_messages(mailbox, number)
+def attachment_parser(mailbox, file_format, in_one_file, quantity):
+    messages = mailbox_messages(mailbox, quantity)
+    if in_one_file:
+        filenames = write_to_one_file(messages, file_format)
+    else:
+        filenames = write_to_multiple_files(messages, file_format)
+    return filenames
+
+
+def write_to_one_file(messages, file_format):
+    folder_name = "tempo"
+    filename = "output." + file_format
+    filepath = make_filepath(folder_name, filename)
+    filenames = [filepath]
     for msg in messages:
         message = Message(msg)
         if message.msg.is_multipart() and file_format in message.content_disposition:
             if message.attachment:
-                open(make_filepath(folder_name, message.attachment), "wb").write(message.body)
+                open(filepath, "ab").write(message.attachment)
+    return filenames
+
+
+def write_to_multiple_files(messages, file_format):
+    folder_name = "tempo"
+    filenames = []
+    for msg in messages:
+        message = Message(msg)
+        if message.msg.is_multipart() and file_format in message.content_disposition:
+            if message.attachment:
+                filename = message.attachment_name
+                filepath = make_filepath(folder_name, filename)
+                if filepath in filenames:
+                    index = filepath.find('.')
+                    filepath = filepath[:index] + str(len(filenames)) + filepath[index:]
+                open(filepath, "wb").write(message.attachment)
+                filenames.append(filepath)
+    return filenames
 
 
 def text_parser(mailbox, target_subject, number):
-    messages = mail_messages(mailbox, number)
+    messages = mailbox_messages(mailbox, number)
     for msg in messages:
         message = Message(msg)
         if target_subject in message.subject:
             return message.body
 
 
-def mail_messages(mailbox, number):
+def mailbox_messages(mailbox, quantity):
     mail = Email.instance()
-    messages = mail.get_msg_list(mailbox, number)
+    messages = mail.get_msg_list(mailbox, quantity)
     return messages
 
 
@@ -134,7 +165,7 @@ def mail_folders():
     for item in byte_list:
         name = item.decode(encoding)
         name = name.split('"/"')
-        folders.append(name[1])
+        folders.append(name[1][1:])
     return folders
 
 
