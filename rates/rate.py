@@ -1,7 +1,7 @@
 import re
 from datetime import date
 
-from email_service import text_parser
+from services.email_service import text_parser
 from rates.xlsx_service import write_to_xlsx
 
 RATE_CONVENTION = {
@@ -14,6 +14,11 @@ RATE_CONVENTION = {
     "MMTDOMRD": ["REPUBLICA DOMINICANA PESO REP. DOMINICANA BHD", "DOP"],
     "MMTDOMBU": ["REPUBLICA DOMINICANA PESO REP. DOMINICANA BANCO UNION", "DOP"],
 }
+
+
+def get_rates_xlsx(xe_rate, mailbox, subject):
+    output_rows = get_rates(xe_rate, mailbox, subject)
+    return write_to_xlsx(output_rows)
 
 
 def get_rates(xe_rate, mailbox, subject):
@@ -34,7 +39,7 @@ def get_rates(xe_rate, mailbox, subject):
     output_rows.append([today, "", "EARNGN", "", "", "", "", "", "NGN"])
     output_rows.append([today, "", "MTBPHL", "", "avahe", "", "", "", "PHP"])
 
-    return write_to_xlsx(output_rows)
+    return output_rows
 
 
 def rates_to_dict(input_data):

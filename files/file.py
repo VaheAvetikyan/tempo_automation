@@ -1,4 +1,4 @@
-from email_service import mail_folders, attachment_parser
+from services.email_service import mail_folders, attachment_parser
 
 
 def get_mail_folders():

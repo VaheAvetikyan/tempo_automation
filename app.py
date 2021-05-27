@@ -1,12 +1,12 @@
 import os
 import zipfile
-
-from flask import Flask, render_template, request, Response, send_file, redirect, url_for, flash
 import logging
+
+from flask import Flask, render_template, request, send_file, redirect, url_for, flash
 from datetime import datetime
 
 from files.file import get_mail_folders, download_file
-from rates.rate import get_rates
+from rates.rate import get_rates_xlsx
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY')
@@ -33,8 +33,8 @@ def calculate_rates():
         flash('No rate is provided. Please provide a rate')
         return redirect(url_for('rates'))
     rate = float(rate)
-    get_rates(rate, mailbox, subject)
-    filename = 'rates/output.xlsx'
+    get_rates_xlsx(rate, mailbox, subject)
+    filename = 'tempo/output.xlsx'
     app.logger.info("Getting Rates execution took %s s", (datetime.now() - start_time).total_seconds())
     return send_file(filename, mimetype='application/vnd.ms-excel')
 
@@ -48,6 +48,7 @@ def files():
 
 @app.route('/files/download', methods=['POST'])
 def download():
+    start_time = datetime.now()
     mailbox = request.form.get('mailbox')
     file_format = request.form.get('format')
     one_file = request.form.get('one') == "yes"
@@ -57,13 +58,16 @@ def download():
         zipf = zipfile.ZipFile('tempo/out.zip', 'w', zipfile.ZIP_DEFLATED)
         for file in filenames:
             zipf.write(file)
+            os.remove(file)
         zipf.close()
-        return send_file('out.zip',
+        app.logger.info("File download execution took %s s", (datetime.now() - start_time).total_seconds())
+        return send_file('tempo/out.zip',
                          mimetype='zip',
                          attachment_filename='out.zip',
                          as_attachment=True)
     else:
-        return send_file(filenames[0], mimetype='application/file_format')
+        app.logger.info("File download execution took %s s", (datetime.now() - start_time).total_seconds())
+        return send_file(filenames[0], mimetype='application/' + file_format)
 
 
 if __name__ == '__main__':
