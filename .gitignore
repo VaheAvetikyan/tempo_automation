@@ -131,7 +131,6 @@ dmypy.json
 # idea
 .idea/
 *.xml
-!sepa_20210503_10.xml
 
 # working files
 /tempo

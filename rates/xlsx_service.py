@@ -8,5 +8,5 @@ def write_to_xlsx(output_rows):
         for c, col in enumerate(row, start=1):
             cell = worksheet.cell(row=r, column=c)
             cell.value = str(col)
-    workbook.save('tempo/output.xlsx')
+    workbook.save('output.xlsx')
     return workbook

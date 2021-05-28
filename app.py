@@ -34,7 +34,7 @@ def calculate_rates():
         return redirect(url_for('rates'))
     rate = float(rate)
     get_rates_xlsx(rate, mailbox, subject)
-    filename = 'tempo/output.xlsx'
+    filename = 'output.xlsx'
     app.logger.info("Getting Rates execution took %s s", (datetime.now() - start_time).total_seconds())
     return send_file(filename, mimetype='application/vnd.ms-excel')
 
