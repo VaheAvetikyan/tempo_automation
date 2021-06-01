@@ -1,7 +1,8 @@
-import os
-
 from services.email import Email
+from services.folders import make_filepath
 from services.message import Message
+
+folder_name = "tempo"
 
 
 def attachment_parser(mailbox, file_format, in_one_file, quantity):
@@ -14,8 +15,7 @@ def attachment_parser(mailbox, file_format, in_one_file, quantity):
 
 
 def write_to_one_file(messages, file_format):
-    folder_name = "tempo"
-    filename = "output." + file_format
+    filename = "output" + file_format
     filepath = make_filepath(folder_name, filename)
     filenames = [filepath]
     for msg in messages:
@@ -28,7 +28,6 @@ def write_to_one_file(messages, file_format):
 
 
 def write_to_multiple_files(messages, file_format):
-    folder_name = "tempo"
     filenames = []
     for msg in messages:
         message = Message(msg)
@@ -69,10 +68,3 @@ def mail_folders():
         name = name.split('"/"')
         folders.append(name[1][1:])
     return folders
-
-
-def make_filepath(folder_name, filename):
-    if not os.path.isdir(folder_name):
-        os.mkdir(folder_name)
-    filepath = os.path.join(folder_name, filename)
-    return filepath

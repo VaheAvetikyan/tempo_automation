@@ -7,10 +7,13 @@ from datetime import datetime
 
 from files.file import get_mail_folders, download_file
 from rates.rate import get_rates_xlsx
+from services.folders import make_filepath
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY')
 app.logger.setLevel(logging.INFO)
+
+folder_name = 'tempo'
 
 
 @app.route('/')
@@ -34,9 +37,9 @@ def calculate_rates():
         return redirect(url_for('rates'))
     rate = float(rate)
     get_rates_xlsx(rate, mailbox, subject)
-    filename = 'output.xlsx'
+    filepath = make_filepath(folder_name, 'output.xlsx')
     app.logger.info("Getting Rates execution took %s s", (datetime.now() - start_time).total_seconds())
-    return send_file(filename, mimetype='application/vnd.ms-excel')
+    return send_file(filepath, mimetype='application/vnd.ms-excel')
 
 
 @app.route('/files')
@@ -55,13 +58,13 @@ def download():
     quantity = int(request.form.get('quantity'))
     filenames = download_file(mailbox, file_format, one_file, quantity)
     if len(filenames) > 1:
-        zipf = zipfile.ZipFile('tempo/out.zip', 'w', zipfile.ZIP_DEFLATED)
+        zipf = zipfile.ZipFile(folder_name + '/out.zip', 'w', zipfile.ZIP_DEFLATED)
         for file in filenames:
             zipf.write(file)
             os.remove(file)
         zipf.close()
         app.logger.info("File download execution took %s s", (datetime.now() - start_time).total_seconds())
-        return send_file('tempo/out.zip',
+        return send_file(folder_name + '/out.zip',
                          mimetype='zip',
                          attachment_filename='out.zip',
                          as_attachment=True)

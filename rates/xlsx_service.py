@@ -1,5 +1,7 @@
 from openpyxl import Workbook
 
+from services.folders import make_filepath
+
 
 def write_to_xlsx(output_rows):
     workbook = Workbook()
@@ -8,5 +10,6 @@ def write_to_xlsx(output_rows):
         for c, col in enumerate(row, start=1):
             cell = worksheet.cell(row=r, column=c)
             cell.value = str(col)
-    workbook.save('output.xlsx')
+    filepath = make_filepath('tempo', 'output.xlsx')
+    workbook.save(filepath)
     return workbook

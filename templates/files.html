@@ -22,7 +22,7 @@
                 <label for="mailbox" class="col-3 col-form-label"><h3>Target Mailbox</h3></label>
                 <div class="col-6">
                     <select class="form-select" name="mailbox" id="mailbox" required>
-                        <option value="" disabled selected>Select mailbox...</option>
+                        <option value="" disabled selected>-- Select mailbox --</option>
                         {% for folder in folders %}
                             <option value="{{ folder }}">{{ folder }}</option>
                         {% endfor %}
@@ -33,7 +33,7 @@
                 <label for="file-formats" class="col-3 col-form-label"><h3>File Format</h3></label>
                 <div class="col-3">
                     <select class="form-select" name="format" id="file-formats" required>
-                        <option value="" disabled selected>Select file format...</option>
+                        <option value="" disabled selected>-- Select file format --</option>
                         {% for format in file_formats %}
                             <option value="{{ format }}">{{ format }}</option>
                         {% endfor %}
