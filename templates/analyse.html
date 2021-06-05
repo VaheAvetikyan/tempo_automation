@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}File downloads{% endblock %}
+<script>
+    $(document).ready(function () {
+        $("p").click(function (event) {
+            $(this).hide();
+        });
+    });
+</script>
+{% block header %}
+    <h1>Analyse</h1>
+    <p>Reconcile reports from bank, correspondents and audit.</p>
+{% endblock %}
+{% block body %}
+    <img width="140" height="140"
+         src="{{ url_for('static', filename='analyse.svg') }}" alt="Rates">
+{% endblock %}
+{% block content %}
+    <form method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data">
+        <div class="mb-3 row">
+            <div class="col-3">
+                <label for="Upload-credit-log" class="form-label"><h3>Agency credit log</h3></label>
+            </div>
+            <div class="col-8">
+                <input class="form-control form-control-lg" id="Upload-credit-log" name="credit_log" type="file">
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-3">
+                <label for="Upload-remit-one" class="form-label"><h3>Report Comptable</h3></label>
+            </div>
+            <div class="col-8">
+                <input class="form-control form-control-lg" id="Upload-remit-one" name="remit_one" type="file">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success">Analyse</button>
+    </form>
+{% endblock %}

@@ -133,4 +133,5 @@ dmypy.json
 *.xml
 
 # working files
-/tempo
+/_FOLDER_FILE/
+/_FOLDER_UPLOAD/

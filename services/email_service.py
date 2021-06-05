@@ -1,8 +1,7 @@
+from flask import current_app
 from services.email import Email
 from services.folders import make_filepath
 from services.message import Message
-
-folder_name = "tempo"
 
 
 def attachment_parser(mailbox, file_format, in_one_file, quantity):
@@ -16,7 +15,7 @@ def attachment_parser(mailbox, file_format, in_one_file, quantity):
 
 def write_to_one_file(messages, file_format):
     filename = "output" + file_format
-    filepath = make_filepath(folder_name, filename)
+    filepath = make_filepath(current_app.config['FILE_FOLDER'], filename)
     filenames = [filepath]
     for msg in messages:
         message = Message(msg)
@@ -34,7 +33,7 @@ def write_to_multiple_files(messages, file_format):
         if message.msg.is_multipart() and file_format in message.content_disposition:
             if message.attachment:
                 filename = message.attachment_name
-                filepath = make_filepath(folder_name, filename)
+                filepath = make_filepath(current_app.config['FILE_FOLDER'], filename)
                 if filepath in filenames:
                     index = filepath.find('.')
                     filepath = filepath[:index] + str(len(filenames)) + filepath[index:]

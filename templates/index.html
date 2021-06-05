@@ -20,7 +20,7 @@
         <div class="col-lg-4">
             <img class="rounded-circle" width="140" height="140"
                  src="{{ url_for('static', filename='files.png') }}" alt="File downloads">
-            <h2>File downloads</h2>
+            <h2>Downloads</h2>
             <p>Download multiple files from email attachments. This part is currently under development.</p>
             <p><a class="btn btn-secondary" href="{{ url_for('files') }}">View details »</a></p>
         </div>
@@ -28,8 +28,8 @@
             <img class="rounded-circle" width="140" height="140"
                  src="{{ url_for('static', filename='analyse.jpg') }}" alt="File downloads">
             <h2>Analyse</h2>
-            <p>This part is currently under development.</p>
-            <p><a class="btn btn-secondary" href="#">View details »</a></p>
+            <p>Reconcile reports from bank, correspondents and audit. This part is currently under development.</p>
+            <p><a class="btn btn-secondary" href="{{ url_for('analyse') }}">View details »</a></p>
         </div>
     </div>
 {% endblock %}
