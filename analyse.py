@@ -1,5 +1,8 @@
+import re
+
 import numpy as np
 import pandas as pd
+from flask import current_app
 
 from services.folders import make_filepath
 
@@ -19,9 +22,8 @@ def data_processor(agent_code, agency_credit_log, remit_one):
                      skip_blank_lines=True
                      )
 
-    cl['Reference'] = np.where(cl['Notes'].str[-16:-13].isin(['TEA', 'TEC']),
-                               cl['Notes'].str[-16:],
-                               "")
+    regex = re.compile('(TE[a-zA-Z0-9]{14})')
+    cl['Reference'] = cl['Notes'].str.extract(regex)
 
     cl['Custom Notes'] = np.where(
         cl['Notes'].str.contains("(?i)depot"), 'Depot',
@@ -30,15 +32,19 @@ def data_processor(agent_code, agency_credit_log, remit_one):
             np.where(
                 cl['Notes'].str.contains("(?i)refund"), 'Refund',
                 np.where(
-                    cl['Notes'].str.contains("(?i)fermeture|ouverture"), 'Account Balances',
+                    cl['Notes'].str.contains("(?i)fermeture|ouverture|ouvereture|Rapport caisse"), 'Account Balances',
                     np.where(
                         cl['Notes'].str.contains("(?i)alimentation"), 'Alimentation',
-                        cl['Notes'])))))
+                        np.where(
+                            cl['Notes'].str.contains("(?i)Correction"), 'Correction',
+                            cl['Notes']))))))
 
     credit_log = cl.merge(ro[['status', 'remitt_pay_sett']],
                           left_on='Reference',
                           right_on=ro['trans_ref'],
                           how='left')
+
+    credit_log['Balance check'] = abs(credit_log['Credit Added/Deducted']) - abs(credit_log['remitt_pay_sett'])
 
     remit_one = ro.merge(cl[['Custom Notes', 'Credit Added/Deducted']],
                          left_on='trans_ref',
@@ -83,7 +89,7 @@ def data_processor(agent_code, agency_credit_log, remit_one):
 
     summary = pd.DataFrame(s_data, columns=['Credit Log vs R1 comparison', 'Balance'])
 
-    filepath = make_filepath('_FOLDER_FILE', f'Safe {agent_code}.xlsx')
+    filepath = make_filepath(current_app.config['FILE_FOLDER'], f'Safe {agent_code}.xlsx')
     writer = pd.ExcelWriter(filepath)
     summary.to_excel(writer, sheet_name='Summary', index=False)
     remit_one.to_excel(writer, sheet_name='RemitOne (R1)', index=False)
