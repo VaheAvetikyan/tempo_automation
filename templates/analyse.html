@@ -1,12 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}File downloads{% endblock %}
-<script>
-    $(document).ready(function () {
-        $("p").click(function (event) {
-            $(this).hide();
-        });
-    });
-</script>
+{% block title %}Analyse{% endblock %}
 {% block header %}
     <h1>Analyse</h1>
     <p>Reconcile reports from bank, correspondents and audit.</p>
@@ -17,6 +10,18 @@
 {% endblock %}
 {% block content %}
     <form method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data">
+        <div class="mb-3 row">
+            <div class="col-3">
+                <label for="agent-code" class="form-label"><h3>Agency code</h3></label>
+            </div>
+            <div class="col-8">
+                <select class="form-select form-control-lg" name="agent_code" id="agent-code" required>
+                    <option value="" disabled selected>-- Select Agency Code --</option>
+                    <option value="144">144</option>
+                    <option value="13610">13610</option>
+                </select>
+            </div>
+        </div>
         <div class="mb-3 row">
             <div class="col-3">
                 <label for="Upload-credit-log" class="form-label"><h3>Agency credit log</h3></label>

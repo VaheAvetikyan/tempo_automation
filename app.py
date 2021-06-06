@@ -7,6 +7,7 @@ from datetime import datetime
 
 from werkzeug.utils import secure_filename
 
+from analyse import data_processor
 from files.file import get_mail_folders, download_file
 from rates.rate import get_rates_xlsx
 from services.folders import make_filepath
@@ -81,7 +82,7 @@ def analyse():
     return render_template('analyse.html')
 
 
-@app.route('/upload', methods=['GET', 'POST'])
+@app.route('/analyse/upload', methods=['POST'])
 def upload():
     if request.method == 'POST':
         if not request.files:
@@ -89,17 +90,34 @@ def upload():
             return redirect(url_for('analyse'))
         credit_log = request.files['credit_log']
         remit_one = request.files['remit_one']
+        agent_code = request.form.get('agent_code')
         if credit_log.filename == '' or remit_one.filename == '':
             flash('No selected file')
             return redirect(url_for('analyse'))
         if credit_log and allowed_file(credit_log.filename) and remit_one and allowed_file(remit_one.filename):
             credit_log_filename = secure_filename(credit_log.filename)
             remit_one_filename = secure_filename(remit_one.filename)
-            credit_log.save(make_filepath(app.config['UPLOAD_FOLDER'], credit_log_filename))
-            remit_one.save(make_filepath(app.config['UPLOAD_FOLDER'], remit_one_filename))
-            flash('Files uploaded successfully')
-            return redirect(url_for('analyse'))
+            cl_file = make_filepath(app.config['UPLOAD_FOLDER'], credit_log_filename)
+            ro_file = make_filepath(app.config['UPLOAD_FOLDER'], remit_one_filename)
+            credit_log.save(cl_file)
+            remit_one.save(ro_file)
+            return redirect(url_for('analyse_results', agent_code=agent_code, credit_log=cl_file, remit_one=ro_file))
     return redirect(url_for('analyse'))
+
+
+@app.route('/analyse/results', methods=['GET'])
+def analyse_results():
+    agent_code = int(request.args.get('agent_code'))
+    credit_log = request.args.get('credit_log')
+    remit_one = request.args.get('remit_one')
+    filename, data = data_processor(agent_code, credit_log, remit_one)
+    return render_template('analyse_results.html', data=data, filename=filename)
+
+
+@app.route('/analyse/results/download', methods=['POST'])
+def analyse_results_download():
+    filename = request.form.get('filename')
+    return send_file(filename, mimetype='application/vnd.ms-excel')
 
 
 def allowed_file(filename):
