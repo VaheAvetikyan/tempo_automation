@@ -22,21 +22,22 @@ def data_processor(agent_code, agency_credit_log, remit_one):
                      skip_blank_lines=True
                      )
 
-    regex = re.compile('(TE[a-zA-Z0-9]{14})')
-    cl['Reference'] = cl['Notes'].str.extract(regex)
+    reference = re.compile('(TE[a-zA-Z0-9]{14})')
+    cl['Reference'] = cl['Notes'].str.extract(reference)
 
+    notes = cl['Notes'].str
     cl['Custom Notes'] = np.where(
-        cl['Notes'].str.contains("(?i)depot"), 'Depot',
+        notes.contains("(?i)depot"), 'Depot',
         np.where(
-            cl['Notes'].str.contains("(?i)payment"), 'Paid',
+            notes.contains("(?i)payment"), 'Paid',
             np.where(
-                cl['Notes'].str.contains("(?i)refund"), 'Refund',
+                notes.contains("(?i)refund"), 'Refund',
                 np.where(
-                    cl['Notes'].str.contains("(?i)fermeture|ouverture|ouvereture|Rapport caisse"), 'Account Balances',
+                    notes.contains("(?i)fermeture|ouverture|ouvereture|Rapport caisse"), 'Account Balances',
                     np.where(
-                        cl['Notes'].str.contains("(?i)alimentation"), 'Alimentation',
+                        notes.contains("(?i)alimentation"), 'Alimentation',
                         np.where(
-                            cl['Notes'].str.contains("(?i)Correction"), 'Correction',
+                            notes.contains("(?i)Correction"), 'Correction',
                             cl['Notes']))))))
 
     credit_log = cl.merge(ro[['status', 'remitt_pay_sett']],
@@ -51,41 +52,41 @@ def data_processor(agent_code, agency_credit_log, remit_one):
                          right_on=cl['Reference'],
                          how='left')
 
-    depots = credit_log[credit_log['Custom Notes'] == "Depot"]
-    paid = credit_log[credit_log['Custom Notes'] == "Paid"]
-    refunds = credit_log[credit_log['Custom Notes'] == "Refund"]
+    depot = credit_log[credit_log['Custom Notes'] == "Depot"].sum()['Credit Added/Deducted']
+    paid = credit_log[credit_log['Custom Notes'] == "Paid"].sum()['Credit Added/Deducted']
+    refund = credit_log[credit_log['Custom Notes'] == "Refund"].sum()['Credit Added/Deducted']
     refunds_included_period = credit_log[(credit_log['status'].str.contains("(?i)DELETED", na=False)) &
-                                         (credit_log['Custom Notes'] == "Refund")]
+                                         (credit_log['Custom Notes'] == "Refund")
+                                         ].sum()['Credit Added/Deducted']
 
-    depot_credit_log = depots['Credit Added/Deducted'].sum()
-    paid_credit_log = paid['Credit Added/Deducted'].sum()
-    refund_credit_log = refunds['Credit Added/Deducted'].sum()
-    refunds_included_period_credit_log = refunds_included_period['Credit Added/Deducted'].sum()
+    # Parse Dates
+    credit_log['Date'] = pd.to_datetime(credit_log['Date'], format='%Y-%m-%d %H:%M:%S')
+    remit_one['creation_date'] = remit_one['creation_date'].str[:-6]
+    remit_one['creation_date'] = pd.to_datetime(remit_one['creation_date'], format='%Y-%m-%d %H:%M:%S')
+    remit_one['processed_date'] = remit_one['processed_date'].str[:-6]
+    remit_one['processed_date'] = pd.to_datetime(remit_one['processed_date'], format='%Y-%m-%d %H:%M:%S')
+    remit_one['deleted_date'] = remit_one['deleted_date'].str[:-6]
+    remit_one['deleted_date'] = pd.to_datetime(remit_one['deleted_date'], format='%Y-%m-%d %H:%M:%S')
 
     remit_one = remit_one[remit_one['agent_name'] == agent_code]
     remit_one_cash = remit_one[remit_one['payment_type'] == 'CASH']
-    processed = remit_one_cash[remit_one_cash['status'] == "PROCESSED"]
-    deleted = remit_one_cash[remit_one_cash['status'] == "DELETED"]
-    sent_for_pay = remit_one_cash[remit_one_cash['status'] == "SENT_FOR_PAY"]
-    hq_ok_paid = remit_one_cash[remit_one_cash['status'] == "HQ_OK_PAID"]
-    error = remit_one_cash[remit_one_cash['status'] == "ERROR"]
 
-    processed_remit_one_cash = processed['remitt_pay_sett'].sum()
-    deleted_remit_one_cash = deleted['remitt_pay_sett'].sum()
-    sent_for_pay_remit_one_cash = sent_for_pay['remitt_pay_sett'].sum()
-    hq_ok_paid_remit_one_cash = hq_ok_paid['remitt_pay_sett'].sum()
-    error_remit_one_cash = error['remitt_pay_sett'].sum()
+    processed = remit_one_cash[remit_one_cash['status'] == "PROCESSED"].sum()['remitt_pay_sett']
+    deleted = remit_one_cash[remit_one_cash['status'] == "DELETED"].sum()['remitt_pay_sett']
+    sent_for_pay = remit_one_cash[remit_one_cash['status'] == "SENT_FOR_PAY"].sum()['remitt_pay_sett']
+    hq_ok_paid = remit_one_cash[remit_one_cash['status'] == "HQ_OK_PAID"].sum()['remitt_pay_sett']
+    error = remit_one_cash[remit_one_cash['status'] == "ERROR"].sum()['remitt_pay_sett']
 
-    s_data = [['Depot (Credit Log)', depot_credit_log],
-              ['Paid (Credit Log)', paid_credit_log],
-              ['Refunds (Credit Log)', refund_credit_log],
-              ['Refunds for the included period (Credit Log)', refunds_included_period_credit_log],
-              ['Refunds from non included period (Credit Log)', refund_credit_log - refunds_included_period_credit_log],
-              ['PROCESSED (R1 paid by cash)', processed_remit_one_cash],
-              ['DELETED (R1 paid by cash)', deleted_remit_one_cash],
-              ['SENT_FOR_PAY (R1 paid by cash)', sent_for_pay_remit_one_cash],
-              ['HQ_OK_PAID (R1 paid by cash)', hq_ok_paid_remit_one_cash],
-              ['ERROR (R1 paid by cash)', error_remit_one_cash]]
+    s_data = [['Depot (Credit Log)', depot],
+              ['Paid (Credit Log)', paid],
+              ['Refunds (Credit Log)', refund],
+              ['Refunds for the included period (Credit Log)', refunds_included_period],
+              ['Refunds from non included period (Credit Log)', refund - refunds_included_period],
+              ['PROCESSED (R1 paid by cash)', processed],
+              ['DELETED (R1 paid by cash)', deleted],
+              ['SENT_FOR_PAY (R1 paid by cash)', sent_for_pay],
+              ['HQ_OK_PAID (R1 paid by cash)', hq_ok_paid],
+              ['ERROR (R1 paid by cash)', error]]
 
     summary = pd.DataFrame(s_data, columns=['Credit Log vs R1 comparison', 'Balance'])
 
