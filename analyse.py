@@ -3,24 +3,21 @@ import re
 import numpy as np
 import pandas as pd
 from flask import current_app
+from pandas.errors import ParserError
 
 from services.folders import make_filepath
 
 
 def data_processor(agent_code, agency_credit_log, remit_one):
-    cl = pd.read_csv(agency_credit_log,
-                     sep=',',
-                     header=0,
-                     parse_dates=True,
-                     skip_blank_lines=True
-                     )
+    try:
+        cl = parse_csv_df(agency_credit_log)
+    except Exception as e:
+        raise ValueError(f"{agency_credit_log.split('/')[1]} file format is not applicable for this action.")
 
-    ro = pd.read_csv(remit_one,
-                     sep=',',
-                     header=0,
-                     parse_dates=True,
-                     skip_blank_lines=True
-                     )
+    try:
+        ro = parse_csv_df(remit_one)
+    except Exception as e:
+        raise ValueError(f"{remit_one.split('/')[1]} file format is not applicable for this action.")
 
     reference = re.compile('(TE[a-zA-Z0-9]{14})')
     cl['Reference'] = cl['Notes'].str.extract(reference)
@@ -97,3 +94,23 @@ def data_processor(agent_code, agency_credit_log, remit_one):
     credit_log.to_excel(writer, sheet_name='Credit Log (CL)', index=False)
     writer.save()
     return filepath, s_data
+
+
+def parse_csv_df(filename):
+    try:
+        df = pd.read_csv(filename,
+                         sep=',',
+                         header=0,
+                         parse_dates=True,
+                         skip_blank_lines=True
+                         )
+    except ParserError:
+        df = pd.read_csv(filename,
+                         sep=';',
+                         header=0,
+                         parse_dates=True,
+                         skip_blank_lines=True
+                         )
+    except Exception as e:
+        raise e
+    return df

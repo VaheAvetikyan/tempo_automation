@@ -67,13 +67,13 @@ def download():
             zipf.write(file)
             os.remove(file)
         zipf.close()
-        app.logger.info("File download execution took %s s", (datetime.now() - start_time).total_seconds())
+        app.logger.info("File download from email execution took %s s", (datetime.now() - start_time).total_seconds())
         return send_file(app.config['_FOLDER_FILE'] + '/out.zip',
                          mimetype='zip',
                          attachment_filename='out.zip',
                          as_attachment=True)
     else:
-        app.logger.info("File download execution took %s s", (datetime.now() - start_time).total_seconds())
+        app.logger.info("File download from email execution took %s s", (datetime.now() - start_time).total_seconds())
         return send_file(filenames[0], mimetype='application/' + file_format)
 
 
@@ -84,6 +84,7 @@ def analyse():
 
 @app.route('/analyse/upload', methods=['POST'])
 def upload():
+    start_time = datetime.now()
     if request.method == 'POST':
         if not request.files:
             flash('No file part')
@@ -101,17 +102,25 @@ def upload():
             ro_file = make_filepath(app.config['UPLOAD_FOLDER'], remit_one_filename)
             credit_log.save(cl_file)
             remit_one.save(ro_file)
+            app.logger.info("Files uploaded for analysing in %s s", (datetime.now() - start_time).total_seconds())
             return redirect(url_for('analyse_results', agent_code=agent_code, credit_log=cl_file, remit_one=ro_file))
     return redirect(url_for('analyse'))
 
 
 @app.route('/analyse/results', methods=['GET'])
 def analyse_results():
+    start_time = datetime.now()
     agent_code = int(request.args.get('agent_code'))
     credit_log = request.args.get('credit_log')
     remit_one = request.args.get('remit_one')
-    filename, data = data_processor(agent_code, credit_log, remit_one)
-    return render_template('analyse_results.html', data=data, filename=filename)
+    try:
+        filename, data = data_processor(agent_code, credit_log, remit_one)
+        app.logger.info("Analyse results execution took %s s", (datetime.now() - start_time).total_seconds())
+        return render_template('analyse_results.html', data=data, filename=filename)
+    except Exception as e:
+        flash(str(e))
+        app.logger.info("Analyse results exception raised: %s", str(e))
+        return redirect(url_for('analyse'))
 
 
 @app.route('/analyse/results/download', methods=['POST'])
