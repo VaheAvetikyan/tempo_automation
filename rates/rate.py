@@ -5,6 +5,7 @@ from services.email_service import text_parser
 from rates.xlsx_service import write_to_xlsx
 
 RATE_CONVENTION = {
+    "MMTBRAUSD": ["BRASIL REALES MORE BRASIL", "BRL"],
     "MMTCHL": ["CHILE PESO CHILENO MORE CHILE", "CLP"],
     "MMTCOLPI": ["COLOMBIA PESO COLOMBIANO BANCO W", "COP"],
     "MMTHNDBR": ["HONDURAS LEMPIRA BANRURAL", "HNL"],
